@@ -1,0 +1,119 @@
+body {
+  margin: 0;
+  padding: 0;
+  background-color: rgba(0, 0, 0, 0.85);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
+    monospace;
+}
+
+.box {
+  display: inline-block;
+  background-color: black;
+  width: 90px;
+  height: 90px;
+}
+
+.box:hover {
+  background-color: #fff;
+  filter: blur(10px);
+}
+
+.highlighted {
+  background-color: #a3baff !important ;
+  filter: blur(1px);
+}
+
+.highlightedKill {
+  background-color: #e26d6d !important ;
+  filter: blur(1px);
+}
+
+.white {
+  background-color: white;
+}
+
+.black {
+  background-color: black;
+}
+
+.grid.W {
+  line-height: 0;
+  margin: auto;
+  box-shadow: 0px 0px 200px 20px whitesmoke;
+  margin-top: 0px;
+}
+
+.grid.B {
+  line-height: 0;
+  margin: auto;
+  box-shadow: 0px 0px 200px 20px black;
+  margin-top: 0px;
+}
+
+.B.Pawn {
+  background-image: url(gfx/BPawn.png);
+  background-size: 100% 100%;
+}
+
+.W.Pawn {
+  background-image: url(gfx/WPawn.png);
+  background-size: 100% 100%;
+}
+
+.B.Rook {
+  background-image: url(gfx/BRook.png);
+  background-size: 100% 100%;
+}
+
+.W.Rook {
+  background-image: url(gfx/WRook.png);
+  background-size: 100% 100%;
+}
+
+.B.Knight {
+  background-image: url(gfx/BKnight.png);
+  background-size: 100% 100%;
+}
+
+.W.Knight {
+  background-image: url(gfx/WKnight.png);
+  background-size: 100% 100%;
+}
+
+.B.King {
+  background-image: url(gfx/BKing.png);
+  background-size: 100% 100%;
+}
+
+.W.King {
+  background-image: url(gfx/WKing.png);
+  background-size: 100% 100%;
+}
+
+.B.Queen {
+  background-image: url(gfx/BQueen.png);
+  background-size: 100% 100%;
+}
+
+.W.Queen {
+  background-image: url(gfx/WQueen.png);
+  background-size: 100% 100%;
+}
+
+.B.Bishop {
+  background-image: url(gfx/BBishop.png);
+  background-size: 100% 100%;
+}
+
+.W.Bishop {
+  background-image: url(gfx/WBishop.png);
+  background-size: 100% 100%;
+}

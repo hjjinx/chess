@@ -11,7 +11,7 @@ class Main extends Component {
       highlighted: Array(8)
         .fill()
         .map(() => Array(8).fill(false)),
-      boxesChanged: [], //This array represents the boxes that are changed 
+      boxesChanged: [], //This array represents the boxes that are changed
       currTurn: "W",
       boxSelected: []
     };

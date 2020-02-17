@@ -2,10 +2,14 @@ import React, { Component } from "react";
 
 class Box extends Component {
   handleClick = () => {
-    const currTurn = this.props.currTurn;
     const id = this.props.boxId.split("");
     const i = parseInt(id[0]);
     const j = parseInt(id[1]);
+
+    const currTurn = this.props.currTurn;
+    // const id = this.props.boxId.split("");
+    // const i = parseInt(id[0]);
+    // const j = parseInt(id[1]);
     const value = this.props.units[i][j];
     const highlighted = this.props.highlighted;
     if (highlighted[i][j] === true) {

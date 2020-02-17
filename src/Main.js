@@ -1,6 +1,5 @@
 import React, { Component } from "react";
 import Grid from "./Grid.js";
-import socketIOClient from "socket.io-client";
 
 class Main extends Component {
   constructor() {
@@ -17,40 +16,15 @@ class Main extends Component {
       boxSelected: []
     };
   }
-
   componentDidMount() {
     this.newGame();
-    const socket = socketIOClient("http://localhost:5000");
-    socket.emit("newGame", "");
   }
 
   newGame = () => {
-    let unitsArr = Array(8)
-      .fill()
-      .map(() => Array(8).fill(null));
-
-    for (let i = 0; i < 8; i++) {
-      unitsArr[1][i] = "B_Pawn";
-      unitsArr[6][i] = "W_Pawn";
-    }
-
-    unitsArr[0][4] = "B_King";
-    unitsArr[0][0] = "B_Rook";
-    unitsArr[0][7] = "B_Rook";
-    unitsArr[0][1] = "B_Knight";
-    unitsArr[0][6] = "B_Knight";
-    unitsArr[0][2] = "B_Bishop";
-    unitsArr[0][5] = "B_Bishop";
-    unitsArr[0][3] = "B_Queen";
-    unitsArr[7][4] = "W_King";
-    unitsArr[7][0] = "W_Rook";
-    unitsArr[7][7] = "W_Rook";
-    unitsArr[7][1] = "W_Knight";
-    unitsArr[7][6] = "W_Knight";
-    unitsArr[7][2] = "W_Bishop";
-    unitsArr[7][5] = "W_Bishop";
-    unitsArr[7][3] = "W_Queen";
-    this.setState({ units: unitsArr });
+    this.props.socket.emit("newgame", "");
+    this.props.socket.on("startnewgame", data => {
+      this.setState({ units: data.currBoard, highlighted: data.canMoveTo });
+    });
   };
 
   unHighlight = (i, j) => {
@@ -101,13 +75,15 @@ class Main extends Component {
     highlightedClone[i][j] = false;
     let boxSelected = arrayClone(this.state.boxSelected);
     let unitsClone = arrayClone(this.state.units);
+    console.log(boxSelected);
+    console.log(i, j);
     const prevX = parseInt(boxSelected[1][0]);
     const prevY = parseInt(boxSelected[1][1]);
     if (i === prevX && j === prevY) return;
     if (boxSelected.length > 1) boxSelected.shift();
     boxSelected.push([i, j]);
-    const unit = unitsClone[prevX][prevY];
-    const unitOnBox = unitsClone[i][j];
+    const unit = unitsClone[prevX][prevY]; // The box previously clicked
+    const unitOnBox = unitsClone[i][j]; // the box clicked (i, j)
     if (unitOnBox !== null) {
       if (unitOnBox.split("_")[1] === "King") {
         this.newGame();

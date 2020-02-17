@@ -1,26 +1,33 @@
 const express = require("express");
 const app = express();
-const server = require(http).Server(app);
+const server = require("http").Server(app);
 const socketIO = require("socket.io");
 const io = socketIO(server);
 
 const PORT = 5000;
 
-var state = { 1: [] };
+var state = { 1: { currBoard: [], canMoveTo: [], currTurn: "W" } };
 
 app.get("/", (req, res) => {
   res.json(state);
 });
 
 io.on("connection", socket => {
-  socket.on("newgame", () => {
+  socket.on("newgame", data => {
     const unitsArr = newGame();
-    state[1] = unitsArr;
+    state[1].currBoard = unitsArr;
+    state[1].canMoveTo = Array(8)
+      .fill()
+      .map(() => Array(8).fill(null));
+    socket.emit("startnewgame", state[1]);
   });
-  socket.on("move", () => {});
+  socket.on("checkURL", URL => {
+    if (state[URL]) socket.emit("responseURL", false);
+    else socket.emit("responseURL", true);
+  });
 });
 
-server.listen(PORT);
+server.listen(PORT, () => console.log(`Listening on port ${PORT}`));
 
 const newGame = () => {
   let unitsArr = Array(8)

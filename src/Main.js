@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import Grid from "./Grid.js";
+import socketIOClient from "socket.io-client";
 
 class Main extends Component {
   constructor() {
@@ -15,6 +16,12 @@ class Main extends Component {
       currTurn: "W",
       boxSelected: []
     };
+  }
+
+  componentDidMount() {
+    this.newGame();
+    const socket = socketIOClient("http://localhost:5000");
+    socket.emit("newGame", "");
   }
 
   newGame = () => {
@@ -45,10 +52,6 @@ class Main extends Component {
     unitsArr[7][3] = "W_Queen";
     this.setState({ units: unitsArr });
   };
-
-  componentDidMount() {
-    this.newGame();
-  }
 
   unHighlight = (i, j) => {
     // All boxes except i,j are unhighlighted

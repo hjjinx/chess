@@ -5,96 +5,49 @@ import Main from "./Main";
 import * as serviceWorker from "./serviceWorker";
 import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
 import io from "socket.io-client";
+import axios from "axios";
 
 class Index extends React.Component {
-  socket = io("http://localhost:5000");
-  generateRoom = () => {
-    const arr = [
-      //   "A",
-      //   "B",
-      //   "C",
-      //   "D",
-      //   "E",
-      //   "F",
-      //   "G",
-      //   "H",
-      //   "I",
-      //   "J",
-      //   "K",
-      //   "L",
-      //   "M",
-      //   "N",
-      //   "O",
-      //   "P",
-      //   "Q",
-      //   "R",
-      //   "S",
-      //   "T",
-      //   "U",
-      //   "V",
-      //   "W",
-      //   "X",
-      //   "Y",
-      //   "Z",
-      "a",
-      "b",
-      "c",
-      "d",
-      "e",
-      "f",
-      "g",
-      "h",
-      "i",
-      "j",
-      "k",
-      "l",
-      "m",
-      "n",
-      "o",
-      "p",
-      "q",
-      "r",
-      "s",
-      "t",
-      "u",
-      "v",
-      "w",
-      "x",
-      "y",
-      "z",
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      6,
-      7,
-      8,
-      9
-    ];
-    var subURL = "";
-    for (let i = 0; i < 6; i++) subURL += arr[Math.floor(Math.random() * 36)];
-
-    this.socket.emit("checkURL", subURL);
-    this.socket.on("responseURL", res => {
-      console.log(res);
-      if (!res) {
-        this.generateRoom();
-        return;
-      }
-    });
-    document.location.href = `/game/${subURL}`;
+  state = {
+    password: ""
   };
+  socket = io("http://localhost:5000");
+
+  generateRoom = async () => {
+    const res = await axios.post("/newgame", { password: this.state.password });
+    console.log(res.data);
+    const { subURL } = res.data;
+
+    // this.socket.to(subURL).emit();
+
+    // this.socket.emit("checkURL", subURL);
+    // this.socket.on("responseURL", res => {
+    //   console.log(res);
+    //   if (!res) {
+    //     this.generateRoom();
+    //     return;
+    //   }
+    //   document.location.href = `/game/${subURL}`;
+    // });
+  };
+  handleChange = e => this.setState({ password: e.target.value });
 
   render() {
     return (
       <Router>
         <div style={{ textAlign: "center", marginBottom: "10px" }}>
           <div>
-            <h1>CHESS</h1>
+            <h1 style={{ color: "white" }}>CHESS</h1>
           </div>
           <div>
+            <label style={{ color: "white", margin: "10px" }}>Password</label>
+            <input
+              type="text"
+              style={{ margin: "10px" }}
+              onChange={this.handleChange}
+              name="password"
+              value={this.state.password}
+            ></input>
             <button onClick={this.generateRoom}>Create Room</button>
           </div>
         </div>

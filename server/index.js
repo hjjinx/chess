@@ -3,58 +3,118 @@ const app = express();
 const server = require("http").Server(app);
 const socketIO = require("socket.io");
 const io = socketIO(server);
+const bodyParser = require("body-parser");
+
+const gameFunctions = require("./game/game.js");
 
 const PORT = 5000;
 
-var state = { 1: { currBoard: [], canMoveTo: [], currTurn: "W" } };
+app.use(bodyParser.urlencoded({ extended: true }));
+
+var state = {
+  1: { currBoard: [], canMoveTo: [], currTurn: "W", players: 0, password: "" }
+};
+
+var globalSocket;
+
+io.on("connection", socket => {
+  globalSocket = socket;
+});
+
+// globalSocket.on("");
 
 app.get("/", (req, res) => {
   res.json(state);
 });
 
-io.on("connection", socket => {
-  socket.on("newgame", data => {
-    const unitsArr = newGame();
-    state[1].currBoard = unitsArr;
-    state[1].canMoveTo = Array(8)
-      .fill()
-      .map(() => Array(8).fill(null));
-    socket.emit("startnewgame", state[1]);
-  });
-  socket.on("checkURL", URL => {
-    if (state[URL]) socket.emit("responseURL", false);
-    else socket.emit("responseURL", true);
-  });
-});
+app.post("/newgame", (req, res) => {
+  const { body } = req;
+  const { password } = body;
+  let subURL = "";
 
-server.listen(PORT, () => console.log(`Listening on port ${PORT}`));
+  //checking if the created subURL is already in use
+  while (state[subURL] != undefined || subURL == "") {
+    const arr = [
+      //   "A",
+      //   "B",
+      //   "C",
+      //   "D",
+      //   "E",
+      //   "F",
+      //   "G",
+      //   "H",
+      //   "I",
+      //   "J",
+      //   "K",
+      //   "L",
+      //   "M",
+      //   "N",
+      //   "O",
+      //   "P",
+      //   "Q",
+      //   "R",
+      //   "S",
+      //   "T",
+      //   "U",
+      //   "V",
+      //   "W",
+      //   "X",
+      //   "Y",
+      //   "Z",
+      "a",
+      "b",
+      "c",
+      "d",
+      "e",
+      "f",
+      "g",
+      "h",
+      "i",
+      "j",
+      "k",
+      "l",
+      "m",
+      "n",
+      "o",
+      "p",
+      "q",
+      "r",
+      "s",
+      "t",
+      "u",
+      "v",
+      "w",
+      "x",
+      "y",
+      "z",
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+    ];
+    subURL = "";
+    for (let i = 0; i < 6; i++) subURL += arr[Math.floor(Math.random() * 36)];
+  }
 
-const newGame = () => {
-  let unitsArr = Array(8)
+  globalSocket.join(subURL);
+
+  state[subURL] = {};
+  state[subURL].players = 0;
+  state[subURL].password = password;
+
+  const unitsArr = gameFunctions.newGame();
+  state[subURL].currBoard = unitsArr;
+  state[subURL].canMoveTo = Array(8)
     .fill()
     .map(() => Array(8).fill(null));
 
-  for (let i = 0; i < 8; i++) {
-    unitsArr[1][i] = "B_Pawn";
-    unitsArr[6][i] = "W_Pawn";
-  }
+  res.json({ subURL, ...state[subURL] });
+});
 
-  unitsArr[0][4] = "B_King";
-  unitsArr[0][0] = "B_Rook";
-  unitsArr[0][7] = "B_Rook";
-  unitsArr[0][1] = "B_Knight";
-  unitsArr[0][6] = "B_Knight";
-  unitsArr[0][2] = "B_Bishop";
-  unitsArr[0][5] = "B_Bishop";
-  unitsArr[0][3] = "B_Queen";
-  unitsArr[7][4] = "W_King";
-  unitsArr[7][0] = "W_Rook";
-  unitsArr[7][7] = "W_Rook";
-  unitsArr[7][1] = "W_Knight";
-  unitsArr[7][6] = "W_Knight";
-  unitsArr[7][2] = "W_Bishop";
-  unitsArr[7][5] = "W_Bishop";
-  unitsArr[7][3] = "W_Queen";
-
-  return unitsArr;
-};
+server.listen(PORT, () => console.log(`Listening on port ${PORT}`));

@@ -1,4 +1,8 @@
-# Chess
+# Multiplayer Chess
+
+In-development using socket.io 
+
+# PvP-Chess
 
 Chess with a cool design made using react.js as a fun project.
 https://hjjinx.github.io/chess

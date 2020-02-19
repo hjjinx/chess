@@ -1,10 +1,20 @@
 import React, { Component } from "react";
+import {
+  withRouter,
+  BrowserRouter as Router,
+  Switch,
+  Route,
+  Link
+} from "react-router-dom";
+import axios from "axios";
+
 import Grid from "./Grid.js";
 
 class Main extends Component {
   constructor() {
     super();
     this.state = {
+      roomID: "",
       units: Array(8)
         .fill()
         .map(() => Array(8).fill(null)),
@@ -17,11 +27,16 @@ class Main extends Component {
     };
   }
   componentDidMount() {
+    const roomID = this.props.match.params.id;
+    this.setState({ roomID });
+
+    // axios.get("/all").then(data => console.log(data));
+
     this.newGame();
   }
 
   newGame = () => {
-    this.props.socket.emit("newgame", "");
+    this.props.socket.emit("newgame", { roomID: this.state.roomID });
     this.props.socket.on("startnewgame", data => {
       this.setState({ units: data.currBoard, highlighted: data.canMoveTo });
     });
@@ -768,4 +783,4 @@ function arrayClone(arr) {
   return JSON.parse(JSON.stringify(arr));
 }
 
-export default Main;
+export default withRouter(Main);

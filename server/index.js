@@ -9,29 +9,61 @@ const gameFunctions = require("./game/game.js");
 
 const PORT = 5000;
 
+app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 var state = {
-  1: { currBoard: [], canMoveTo: [], currTurn: "W", players: 0, password: "" }
+  1: {
+    currBoard: [],
+    canMoveTo: [],
+    currTurn: "W",
+    players: 0,
+    password: "",
+    player1: { name: "", id: "" },
+    player2: { name: "", id: "" }
+  }
 };
 
 var globalSocket;
 
 io.on("connection", socket => {
   globalSocket = socket;
+  // console.log(socket.client.id);
+  // socket.on("newgame", roomID => {});
 });
 
-// globalSocket.on("");
-
-app.get("/", (req, res) => {
+app.get("/all", (req, res) => {
   res.json(state);
 });
 
 app.post("/newgame", (req, res) => {
   const { body } = req;
-  const { password } = body;
-  let subURL = "";
+  console.log(req.body);
+  let roomID = generateRoomURL();
 
+  globalSocket.join(roomID);
+
+  state[roomID] = {};
+  state[roomID].players = 0;
+  state[roomID].password = body.password;
+  console.log(`password: ${state[roomID].password}`);
+
+  state[roomID].player1 = { name: body.name, id: globalSocket.client.id };
+  state[roomID].player2 = { name: "", id: "" };
+
+  const unitsArr = gameFunctions.newGame();
+  state[roomID].currBoard = unitsArr;
+  state[roomID].canMoveTo = Array(8)
+    .fill()
+    .map(() => Array(8).fill(null));
+
+  res.json({ roomID });
+});
+
+server.listen(PORT, () => console.log(`Listening on port ${PORT}`));
+
+function generateRoomURL() {
+  let subURL = "";
   //checking if the created subURL is already in use
   while (state[subURL] != undefined || subURL == "") {
     const arr = [
@@ -101,20 +133,5 @@ app.post("/newgame", (req, res) => {
     subURL = "";
     for (let i = 0; i < 6; i++) subURL += arr[Math.floor(Math.random() * 36)];
   }
-
-  globalSocket.join(subURL);
-
-  state[subURL] = {};
-  state[subURL].players = 0;
-  state[subURL].password = password;
-
-  const unitsArr = gameFunctions.newGame();
-  state[subURL].currBoard = unitsArr;
-  state[subURL].canMoveTo = Array(8)
-    .fill()
-    .map(() => Array(8).fill(null));
-
-  res.json({ subURL, ...state[subURL] });
-});
-
-server.listen(PORT, () => console.log(`Listening on port ${PORT}`));
+  return subURL;
+}

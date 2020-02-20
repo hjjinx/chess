@@ -30,10 +30,32 @@ io.on("connection", socket => {
   globalSocket = socket;
   // console.log(socket.client.id);
   // socket.on("newgame", roomID => {});
+  socket.on("joiningRoom", data => {
+    console.log(socket.id + " joined room " + data.roomID);
+    socket.join(data.roomID);
+  });
 });
 
 app.get("/all", (req, res) => {
   res.json(state);
+});
+
+app.post("/joinroom", (req, res) => {
+  const data = req.body;
+  if (
+    data.password == state[data.roomID].password &&
+    state[data.roomID].players <= 1
+  ) {
+    res.json(true);
+    state[data.roomID].players++;
+    if (state[data.roomID].players == 1) {
+      state[data.roomID].player1 = { name: data.name };
+    } else if (state[data.roomID].players == 2) {
+      state[data.roomID].player2 = { name: data.name };
+    }
+  } else {
+    res.json(false);
+  }
 });
 
 app.post("/newgame", (req, res) => {
@@ -48,8 +70,8 @@ app.post("/newgame", (req, res) => {
   state[roomID].password = body.password;
   console.log(`password: ${state[roomID].password}`);
 
-  state[roomID].player1 = { name: body.name, id: globalSocket.client.id };
-  state[roomID].player2 = { name: "", id: "" };
+  state[roomID].player1 = { name: "" };
+  state[roomID].player2 = { name: "" };
 
   const unitsArr = gameFunctions.newGame();
   state[roomID].currBoard = unitsArr;

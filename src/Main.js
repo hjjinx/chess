@@ -1,11 +1,5 @@
 import React, { Component } from "react";
-import {
-  withRouter,
-  BrowserRouter as Router,
-  Switch,
-  Route,
-  Link
-} from "react-router-dom";
+import { withRouter } from "react-router-dom";
 import axios from "axios";
 
 import Grid from "./Grid.js";
@@ -26,11 +20,22 @@ class Main extends Component {
       boxSelected: []
     };
   }
-  componentDidMount() {
+  async componentDidMount() {
     const roomID = this.props.match.params.id;
     this.setState({ roomID });
 
-    // axios.get("/all").then(data => console.log(data));
+    const password = prompt("Enter the password to join this room");
+    console.log(password);
+    const confirmation = await axios.post("/joinroom", {
+      password,
+      roomID,
+      name: this.props.name
+    });
+    console.log(confirmation);
+    if (!confirmation.data || password == null) document.location.href = "/";
+    else {
+      this.props.socket.emit("joiningRoom", { roomID });
+    }
 
     this.newGame();
   }

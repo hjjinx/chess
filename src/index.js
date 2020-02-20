@@ -64,7 +64,12 @@ class Index extends React.Component {
           </div>
         </Route>
         <Route path="/game/:id">
-          <Main socket={this.socket} id />
+          <Main
+            socket={this.socket}
+            id
+            name={this.state.name}
+            generateRoom={this.generateRoom}
+          />
         </Route>
       </Router>
     );

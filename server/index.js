@@ -29,10 +29,45 @@ var globalSocket;
 io.on("connection", socket => {
   globalSocket = socket;
   // console.log(socket.client.id);
-  // socket.on("newgame", roomID => {});
   socket.on("joiningRoom", data => {
     console.log(socket.id + " joined room " + data.roomID);
     socket.join(data.roomID);
+  });
+  socket.on("getState", data => {
+    const { roomID } = data;
+    const currState = state[roomID];
+    io.to(roomID).emit("state", {
+      units: currState.currBoard,
+      currTurn: currState.currTurn
+    });
+  });
+  socket.on("move", data => {
+    // The client sends the coordinates of the last two boxes he clicked.
+
+    const { prevX, prevY, x, y, roomID } = data;
+    const currState = state[roomID];
+    const movingFrom = currState.currBoard[prevX][prevY];
+    const movingTo = currState.currBoard[x][y];
+
+    const arr = gameFunctions.checkMovementFrom(
+      prevX,
+      prevY,
+      currState.currBoard,
+      currState.currTurn
+    );
+    if (arr[x][y] == true) {
+      currState.currBoard[x][y] = movingFrom;
+      currState.currBoard[prevX][prevY] = null;
+      currState.currTurn = currState.currTurn == "W" ? "B" : "W";
+
+      io.to(roomID).emit("state", {
+        units: currState.currBoard,
+        currTurn: currState.currTurn
+      });
+    }
+
+    // const state = state[roomID];
+    // if (state[roomID].currBoard)
   });
 });
 
@@ -46,15 +81,17 @@ app.post("/joinroom", (req, res) => {
     data.password == state[data.roomID].password &&
     state[data.roomID].players <= 1
   ) {
-    res.json(true);
     state[data.roomID].players++;
     if (state[data.roomID].players == 1) {
-      state[data.roomID].player1 = { name: data.name };
+      state[data.roomID].player1 = { name: data.name, color: "W" };
+      res.json({ canJoin: true, color: "W" });
     } else if (state[data.roomID].players == 2) {
-      state[data.roomID].player2 = { name: data.name };
+      // The second person to join the room always gets the Black turn
+      state[data.roomID].player2 = { name: data.name, color: "B" };
+      res.json({ canJoin: true, color: "B" });
     }
   } else {
-    res.json(false);
+    res.json({ canJoin: false, color: "" });
   }
 });
 
@@ -70,8 +107,9 @@ app.post("/newgame", (req, res) => {
   state[roomID].password = body.password;
   console.log(`password: ${state[roomID].password}`);
 
-  state[roomID].player1 = { name: "" };
-  state[roomID].player2 = { name: "" };
+  state[roomID].player1 = { name: "", color: "W" };
+  state[roomID].player2 = { name: "", color: "B" };
+  state[roomID].currTurn = "W";
 
   const unitsArr = gameFunctions.newGame();
   state[roomID].currBoard = unitsArr;

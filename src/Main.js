@@ -15,9 +15,9 @@ class Main extends Component {
       highlighted: Array(8)
         .fill()
         .map(() => Array(8).fill(false)),
-      boxesChanged: [], //This array represents the boxes that are changed
       currTurn: "W",
-      boxSelected: []
+      ownColor: "",
+      boxSelected: [] // Basically a Queue to keep track of previous 2 boxes clicked.
     };
   }
   async componentDidMount() {
@@ -25,35 +25,48 @@ class Main extends Component {
     this.setState({ roomID });
 
     const password = prompt("Enter the password to join this room");
-    console.log(password);
     const confirmation = await axios.post("/joinroom", {
       password,
       roomID,
       name: this.props.name
     });
-    console.log(confirmation);
-    if (!confirmation.data || password == null) document.location.href = "/";
+    if (!confirmation.data.canJoin || password == null)
+      document.location.href = "/";
     else {
+      const { color } = confirmation.data;
+      this.setState({ ownColor: color });
       this.props.socket.emit("joiningRoom", { roomID });
     }
 
+    this.registerSocketListeners();
     this.newGame();
   }
 
-  newGame = () => {
-    this.props.socket.emit("newgame", { roomID: this.state.roomID });
-    this.props.socket.on("startnewgame", data => {
-      this.setState({ units: data.currBoard, highlighted: data.canMoveTo });
+  registerSocketListeners = () => {
+    this.props.socket.on("state", data => {
+      this.setState({ units: data.units, currTurn: data.currTurn });
+      this.unHighlightAll();
     });
   };
 
-  unHighlight = (i, j) => {
+  newGame = () => {
+    this.props.socket.emit("getState", { roomID: this.state.roomID });
+  };
+
+  unHighlightAllExcept = (i, j) => {
     // All boxes except i,j are unhighlighted
     let newArr = Array(8)
       .fill()
       .map(() => Array(8).fill(false));
     newArr[i][j] = true;
     return newArr;
+  };
+
+  unHighlightAll = () => {
+    let newArr = Array(8)
+      .fill()
+      .map(() => Array(8).fill(false));
+    this.setState({ highlighted: newArr });
   };
 
   handleSelect = (i, j) => {
@@ -63,7 +76,7 @@ class Main extends Component {
     if (boxSelected.length > 1) boxSelected.shift();
     boxSelected.push([i, j]);
     this.setState({ boxSelected });
-    highlightedClone = this.unHighlight(i, j);
+    highlightedClone = this.unHighlightAllExcept(i, j);
     // Clicking any other box removes all prior highlighting.
     const unit = this.state.units[i][j].split("_")[1];
     this.setState({ highlighted: highlightedClone, boxSelected: boxSelected });
@@ -91,14 +104,13 @@ class Main extends Component {
   };
 
   moveUnit = (i, j) => {
-    let highlightedClone = this.unHighlight(i, j);
-    highlightedClone[i][j] = false;
     let boxSelected = arrayClone(this.state.boxSelected);
     let unitsClone = arrayClone(this.state.units);
-    console.log(boxSelected);
-    console.log(i, j);
+
     const prevX = parseInt(boxSelected[1][0]);
     const prevY = parseInt(boxSelected[1][1]);
+
+    // If the box being clicked is the same as the previously clicked one
     if (i === prevX && j === prevY) return;
     if (boxSelected.length > 1) boxSelected.shift();
     boxSelected.push([i, j]);
@@ -115,14 +127,15 @@ class Main extends Component {
         return;
       }
     }
+
+    let highlightedClone = Array(8)
+      .fill()
+      .map(() => Array(8).fill(false));
+
     unitsClone[i][j] = unit;
     unitsClone[prevX][prevY] = null;
-    let turn = this.state.currTurn;
-    if (turn === "W") turn = "B";
-    else turn = "W";
     this.setState({
       units: unitsClone,
-      currTurn: turn,
       boxSelected,
       highlighted: highlightedClone
     });
@@ -779,6 +792,10 @@ class Main extends Component {
         handleSelect={this.handleSelect}
         highlighted={this.state.highlighted}
         moveUnit={this.moveUnit}
+        ownColor={this.state.ownColor}
+        boxSelected={this.state.boxSelected}
+        socket={this.props.socket}
+        roomID={this.state.roomID}
       />
     );
   }

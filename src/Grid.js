@@ -20,6 +20,10 @@ class Grid extends Component {
             handleSelect={this.props.handleSelect}
             highlighted={this.props.highlighted}
             moveUnit={this.props.moveUnit}
+            ownColor={this.props.ownColor}
+            boxSelected={this.props.boxSelected}
+            socket={this.props.socket}
+            roomID={this.props.roomID}
           />
         );
       }

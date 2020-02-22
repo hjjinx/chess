@@ -47,6 +47,15 @@ class Main extends Component {
       this.setState({ units: data.units, currTurn: data.currTurn });
       this.unHighlightAll();
     });
+    this.props.socket.on("gameOver", data => {
+      const { won } = data;
+      if (won == this.state.ownColor) {
+        alert("You win :)");
+      } else {
+        alert("You lose :(");
+      }
+      document.location.href = "/";
+    });
   };
 
   newGame = () => {

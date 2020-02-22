@@ -56,6 +56,14 @@ io.on("connection", socket => {
       currState.currTurn
     );
     if (arr[x][y] == true) {
+      if (
+        currState.currBoard[x][y] &&
+        currState.currBoard[x][y].split("_")[1] == "King"
+      ) {
+        io.to(roomID).emit("gameOver", { won: currState.currTurn });
+        state[roomID] = undefined;
+        return;
+      }
       currState.currBoard[x][y] = movingFrom;
       currState.currBoard[prevX][prevY] = null;
       currState.currTurn = currState.currTurn == "W" ? "B" : "W";

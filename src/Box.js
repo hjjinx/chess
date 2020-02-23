@@ -16,7 +16,7 @@ class Box extends Component {
 
     // If the box recently selected is a position that a currently selected unit can move to, then move.
     if (isHighlighted[i][j] === true) {
-      // this.props.moveUnit(i, j);
+      this.props.moveUnit(i, j);
       this.props.socket.emit("move", {
         prevX: boxSelected[1][0],
         prevY: boxSelected[1][1],

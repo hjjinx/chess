@@ -7,7 +7,7 @@ const bodyParser = require("body-parser");
 
 const gameFunctions = require("./game/game.js");
 
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -105,7 +105,6 @@ app.post("/joinroom", (req, res) => {
 
 app.post("/newgame", (req, res) => {
   const { body } = req;
-  console.log(req.body);
   let roomID = generateRoomURL();
 
   globalSocket.join(roomID);

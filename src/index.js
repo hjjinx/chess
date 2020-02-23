@@ -13,7 +13,7 @@ class Index extends React.Component {
     password: "",
     name: ""
   };
-  socket = io("http://localhost:5000");
+  socket = io("https://vast-taiga-78081.herokuapp.com");
 
   generateRoom = async () => {
     const res = await axios.post("/newgame", {

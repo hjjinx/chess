@@ -11,9 +11,19 @@ import * as serviceWorker from "./serviceWorker";
 class Index extends React.Component {
   state = {
     password: "",
-    name: ""
+    name: "",
+    rooms: []
   };
-  socket = io("https://vast-taiga-78081.herokuapp.com");
+  interval = "";
+  socket = io("localhost:5000");
+
+  componentDidMount() {
+    // This is emitted on the server evey 2 seconds.
+    // It contains the list of all rooms currently created on the server.
+    this.socket.on("listOfRooms", data => {
+      this.setState({ rooms: data });
+    });
+  }
 
   generateRoom = async () => {
     const res = await axios.post("/newgame", {
@@ -26,7 +36,34 @@ class Index extends React.Component {
   };
   handleChange = e => this.setState({ [e.target.name]: e.target.value });
 
+  joinRoom = room => {
+    console.log(this.state);
+    document.location.href = `/game/${room.roomId}`;
+  };
+
   render() {
+    var tableList = [];
+    for (let i = 0; i < this.state.rooms.length; i++) {
+      const room = this.state.rooms[i];
+      tableList.push(
+        <tr>
+          <td>{room.players}</td>
+          <td>{room.player1.name}</td>
+          <td>{room.player2.name}</td>
+          <td>{room.passwordProtected ? "Yes" : "No"}</td>
+          <td>
+            {room.players < 2 ? (
+              <button onClick={() => this.joinRoom(room)}>
+                {" "}
+                {room.roomId}
+              </button>
+            ) : (
+              "Can't. Room Full"
+            )}
+          </td>
+        </tr>
+      );
+    }
     return (
       <Router>
         <Route exact path="/">
@@ -39,7 +76,9 @@ class Index extends React.Component {
               <input
                 type="text"
                 style={{ margin: "10px" }}
-                onChange={this.handleChange}
+                onChange={e => {
+                  this.setState({ name: e.target.value });
+                }}
                 name="name"
                 value={this.state.name}
               ></input>
@@ -55,6 +94,24 @@ class Index extends React.Component {
               <br></br>
               <button onClick={this.generateRoom}>Create Room</button>
             </div>
+          </div>
+          <div
+            style={{
+              color: "white",
+              textAlign: "center"
+            }}
+          >
+            <h1>Rooms available:</h1>
+            <table align="center" border="1" style={{ width: "50%" }}>
+              <tr>
+                <th>Players</th>
+                <th>Player 1</th>
+                <th>Player 2</th>
+                <th>Password?</th>
+                <th>Join</th>
+              </tr>
+              {tableList}
+            </table>
           </div>
         </Route>
         <Route path="/game/:id">

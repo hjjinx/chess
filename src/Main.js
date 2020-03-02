@@ -23,6 +23,7 @@ class Main extends Component {
   async componentDidMount() {
     const roomID = this.props.match.params.id;
     this.setState({ roomID });
+    console.log(this.props.name);
 
     const password = prompt("Enter the password to join this room");
     const confirmation = await axios.post("/joinroom", {
@@ -55,6 +56,12 @@ class Main extends Component {
         alert("You lose :(");
       }
       document.location.href = "/";
+    });
+    this.props.socket.on("exit", data => {
+      if (data.message == "Player disconnected") {
+        alert("Apologies. The other player disconnected.");
+        document.location.href = "/";
+      }
     });
   };
 

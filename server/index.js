@@ -13,7 +13,8 @@ app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 var state = {
-  1: {
+  /** This is the structure of a room being stored in this state
+   * 1: {
     currBoard: [],
     canMoveTo: [],
     currTurn: "W",
@@ -22,13 +23,35 @@ var state = {
     player1: { name: "", id: "" },
     player2: { name: "", id: "" }
   }
+   */
 };
 
 var globalSocket;
 
+emitListOfRooms = socket => {
+  let toSend = [];
+  let i = 0;
+  for (room in state) {
+    toSend[i] = {};
+    toSend[i].players = state[room].players;
+    toSend[i].player1 = state[room].player1;
+    toSend[i].player2 = state[room].player2;
+    toSend[i].roomId = room;
+    if (state[room].password == "" || state[room].password == null)
+      toSend[i].passwordProtected = false;
+    else toSend[i].passwordProtected = true;
+    i++;
+  }
+  socket.emit("listOfRooms", toSend);
+};
+
 io.on("connection", socket => {
   globalSocket = socket;
-  // console.log(socket.client.id);
+  emitListOfRooms(socket);
+  var interval = setInterval(() => {
+    emitListOfRooms(socket);
+  }, 2000);
+
   socket.on("joiningRoom", data => {
     console.log(socket.id + " joined room " + data.roomID);
     socket.join(data.roomID);
@@ -77,6 +100,21 @@ io.on("connection", socket => {
     // const state = state[roomID];
     // if (state[roomID].currBoard)
   });
+
+  socket.on("disconnecting", () => {
+    clearInterval(interval);
+    const keys = Object.keys(socket.rooms);
+    let roomId;
+    if (keys.length > 1) {
+      if (socket.rooms[keys[0]] == keys[0]) {
+        roomId = keys[1];
+      } else {
+        roomId = keys[0];
+      }
+      io.to(roomId).emit("exit", { message: "Player disconnected" });
+      delete state[roomId];
+    }
+  });
 });
 
 app.get("/all", (req, res) => {
@@ -85,6 +123,8 @@ app.get("/all", (req, res) => {
 
 app.post("/joinroom", (req, res) => {
   const data = req.body;
+  console.log(data);
+  globalSocket.join(data.roomID);
   if (
     data.password == state[data.roomID].password &&
     state[data.roomID].players <= 1
@@ -101,18 +141,16 @@ app.post("/joinroom", (req, res) => {
   } else {
     res.json({ canJoin: false, color: "" });
   }
+  // console.log(state);
 });
 
 app.post("/newgame", (req, res) => {
   const { body } = req;
   let roomID = generateRoomURL();
 
-  globalSocket.join(roomID);
-
   state[roomID] = {};
   state[roomID].players = 0;
   state[roomID].password = body.password;
-  console.log(`password: ${state[roomID].password}`);
 
   state[roomID].player1 = { name: "", color: "W" };
   state[roomID].player2 = { name: "", color: "B" };

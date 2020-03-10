@@ -15,7 +15,7 @@ class Index extends React.Component {
     rooms: []
   };
   interval = "";
-  socket = io("localhost:5000");
+  socket = io("http://localhost:5000");
 
   componentDidMount() {
     // This is emitted on the server evey 2 seconds.

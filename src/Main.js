@@ -23,7 +23,6 @@ class Main extends Component {
   async componentDidMount() {
     const roomID = this.props.match.params.id;
     this.setState({ roomID });
-    console.log(this.props.name);
 
     const password = prompt("Enter the password to join this room");
     const confirmation = await axios.post("/joinroom", {

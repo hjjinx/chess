@@ -27,8 +27,6 @@ var state = {
    */
 };
 
-var globalSocket;
-
 emitListOfRooms = socket => {
   let toSend = [];
   let i = 0;
@@ -46,7 +44,6 @@ emitListOfRooms = socket => {
 };
 
 io.on("connection", socket => {
-  globalSocket = socket;
   emitListOfRooms(socket);
   var interval = setInterval(() => {
     emitListOfRooms(socket);
@@ -124,18 +121,17 @@ app.get("/all", (req, res) => {
 app.post("/joinroom", (req, res) => {
   const data = req.body;
   console.log(data);
-  globalSocket.join(data.roomID);
   if (
     data.password == state[data.roomID].password &&
     state[data.roomID].players <= 1
   ) {
     state[data.roomID].players++;
     if (state[data.roomID].players == 1) {
-      state[data.roomID].player1 = { name: data.name, color: "W" };
+      state[data.roomID].player1 = { color: "W" };
       res.json({ canJoin: true, color: "W" });
     } else if (state[data.roomID].players == 2) {
       // The second person to join the room always gets the Black turn
-      state[data.roomID].player2 = { name: data.name, color: "B" };
+      state[data.roomID].player2 = { color: "B" };
       res.json({ canJoin: true, color: "B" });
     }
   } else {

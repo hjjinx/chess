@@ -21,7 +21,8 @@ var state = {
     players: 0,
     password: "",
     player1: { name: "", id: "" },
-    player2: { name: "", id: "" }
+    player2: { name: "", id: "" },
+    description: ""
   }
    */
 };
@@ -34,8 +35,7 @@ emitListOfRooms = socket => {
   for (room in state) {
     toSend[i] = {};
     toSend[i].players = state[room].players;
-    toSend[i].player1 = state[room].player1;
-    toSend[i].player2 = state[room].player2;
+    toSend[i].description = state[room].description;
     toSend[i].roomId = room;
     if (state[room].password == "" || state[room].password == null)
       toSend[i].passwordProtected = false;
@@ -150,10 +150,11 @@ app.post("/newgame", (req, res) => {
 
   state[roomID] = {};
   state[roomID].players = 0;
+  state[roomID].description = body.description;
   state[roomID].password = body.password;
 
-  state[roomID].player1 = { name: "", color: "W" };
-  state[roomID].player2 = { name: "", color: "B" };
+  state[roomID].player1 = { color: "W" };
+  state[roomID].player2 = { color: "B" };
   state[roomID].currTurn = "W";
 
   const unitsArr = gameFunctions.newGame();

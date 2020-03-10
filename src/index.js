@@ -11,7 +11,7 @@ import * as serviceWorker from "./serviceWorker";
 class Index extends React.Component {
   state = {
     password: "",
-    name: "",
+    description: "",
     rooms: []
   };
   interval = "";
@@ -27,7 +27,7 @@ class Index extends React.Component {
 
   generateRoom = async () => {
     const res = await axios.post("/newgame", {
-      name: this.state.name,
+      description: this.state.description,
       password: this.state.password
     });
     const { roomID } = res.data;
@@ -48,8 +48,7 @@ class Index extends React.Component {
       tableList.push(
         <tr>
           <td>{room.players}</td>
-          <td>{room.player1.name}</td>
-          <td>{room.player2.name}</td>
+          <td>{room.description}</td>
           <td>{room.passwordProtected ? "Yes" : "No"}</td>
           <td>
             {room.players < 2 ? (
@@ -72,15 +71,17 @@ class Index extends React.Component {
               <h1 style={{ color: "white" }}>CHESS</h1>
             </div>
             <div>
-              <label style={{ color: "white", margin: "10px" }}>Name</label>
+              <label style={{ color: "white", margin: "10px" }}>
+                Room Description
+              </label>
               <input
                 type="text"
                 style={{ margin: "10px" }}
                 onChange={e => {
-                  this.setState({ name: e.target.value });
+                  this.setState({ description: e.target.value });
                 }}
-                name="name"
-                value={this.state.name}
+                name="description"
+                value={this.state.description}
               ></input>
 
               <label style={{ color: "white", margin: "10px" }}>Password</label>
@@ -105,8 +106,7 @@ class Index extends React.Component {
             <table align="center" border="1" style={{ width: "50%" }}>
               <tr>
                 <th>Players</th>
-                <th>Player 1</th>
-                <th>Player 2</th>
+                <th>Description</th>
                 <th>Password?</th>
                 <th>Join</th>
               </tr>
@@ -115,12 +115,7 @@ class Index extends React.Component {
           </div>
         </Route>
         <Route path="/game/:id">
-          <Main
-            socket={this.socket}
-            id
-            name={this.state.name}
-            generateRoom={this.generateRoom}
-          />
+          <Main socket={this.socket} id generateRoom={this.generateRoom} />
         </Route>
       </Router>
     );

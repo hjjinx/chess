@@ -11,7 +11,7 @@
 
 ## Working
 
-Can be tried here: http://13.126.224.0:3000/
+Can be tried here: http://13.126.224.0:9000/
 Create a room by entering the description and password then ask your friend (or opponent :p) to browse the same URL that you have and enter the password that you set.
 
 This can be played by 2 people by one creating a room and the other joining it using the URL generated.
